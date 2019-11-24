@@ -15,21 +15,25 @@ import requests
 from bs4 import BeautifulSoup
 import smtplib
 from email.mime.text import MIMEText
-
+import datetime
 def get_weather():
     '''获取天气'''
     user_agent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.97 Safari/537.36'
     headers = {'user-agent':user_agent}
     r  = requests.get('https://tianqi.911cha.com/hangzhou/',headers=headers)
     s = BeautifulSoup(r.text)
+    #获取当天时间
+    today = datetime.date.today()
+    #获得当天天气总览
+    t_weather = s.find('a',href = './{0}.html'.format(today))
     #最低温度
-    min_tem = s.find('a',href = './2019-11-23.html').find('span','f16').text[1:]
+    min_tem = t_weather.find('span','f16').text[1:]
     #最高温度
-    max_tem = s.find('a',href = './2019-11-23.html').find('span','f24').text
+    max_tem = t_weather.find('span','f24').text
     #日期
-    date= s.find('a',href = './2019-11-23.html').find('div','f12 pt').text
+    date= t_weather.find('div','f12 pt').text
     #天气情况
-    weather= s.find('a',href = './2019-11-23.html').find('div','w_week_desc').text
+    weather= t_weather.find('div','w_week_desc').text
     return (date,max_tem,min_tem,weather)
 
 
@@ -38,7 +42,7 @@ def send_msg(w):
     #163邮箱服务器地址
     mail_host = 'smtp.163.com'  
     #163用户名
-    mail_user = 'snoopy98'  
+    mail_user = '1oser5'  
     #密码(部分邮箱为授权码) 
     mail_pass = 'xxxx'   
     #邮件发送方邮箱地址
