@@ -41,10 +41,10 @@ def send_msg(w):
     #设置服务器所需信息
     #163邮箱服务器地址
     mail_host = 'smtp.163.com'  
-    #163用户名
-    mail_user = '1oser5'  
+    #163用户名,用户名还不能乱写。。
+    mail_user = 'snoopy98'  
     #密码(部分邮箱为授权码) 
-    mail_pass = 'xxxx'   
+    mail_pass = 'xxx'   
     #邮件发送方邮箱地址
     sender = 'snoopy98@163.com'  
     #邮件接受方邮箱地址，注意需要[]包裹，这意味着你可以写多个邮件地址群发
