@@ -51,11 +51,13 @@ for p in defList:
 for x in imgs:
     #高清图地址
     high_img.append('https://usdawatercolors.nal.usda.gov/pom/download.xhtml?id={0}'.format(x.find('img')['src'].split('/')[2]))
+print(high_img)
 def download_img(ori_img_url,filename):
-    resp = requests.get(ori_img_url)
-    with open('/Users/xtl/Desktop/test/' + filename, 'w+') as f:
-        f.write(resp.content)
-        print('saved...', filename)
+    resp = requests.get(ori_img_url,headers=headers)
+    print('write in ')
+    # with open('/Users/xtl/Desktop/test/' + filename, 'w+') as f:
+    #     f.write(resp.content)
+    #     print('saved...', filename)
 # for i in range(20):
 download_img(high_img[0], Scientific[0])
 
