@@ -48,7 +48,7 @@ class Fruit(object):
         #timeout 参数为元组时，第一个表示 Connect 时间，第二个为 read 时间
         resp = requests.get(self.ImgUrl, timeout=(3, 30))
         # 图片一定要以 wb (二进制)打开,文件储存为 Scientific.png 格式
-        with open('{0}/{1}-{2}.png'.format(dir_url,self.Scientific.replace(' ','-'), self.Specimen), 'wb') as f:
+        with open('{0}/{1}-{2}.png'.format(dir_url,self.Scientific.replace('/','-'), self.Specimen.replace('/','-')), 'wb') as f:
             f.write(resp.content)
             color_print('saved...{0}-{1}.png'.format(self.Scientific.replace(' ','-'), self.Specimen))
     def export_info(self,info):
@@ -139,7 +139,7 @@ def send_msg(use_time):
     #163用户名,用户名还不能乱写。。
     mail_user = 'snoopy98'  
     #密码(部分邮箱为授权码) 
-    mail_pass = 'xxxx'   
+    mail_pass = 'Snoopy985'   
     #邮件发送方邮箱地址
     sender = 'snoopy98@163.com'  
     #邮件接受方邮箱地址，注意需要[]包裹，这意味着你可以写多个邮件地址群发
