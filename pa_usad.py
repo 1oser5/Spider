@@ -54,7 +54,7 @@ class Fruit(object):
     def export_info(self,info):
         """导出水果信息"""
         with open('fruit.txt', 'a+') as f:
-            f.write(str(info+'\n'))
+            f.write(str(info) + '\n')
 def check_dir(dir_url):
     """检查文件夹是否存在，如果不存在则创建
 
@@ -139,7 +139,7 @@ def send_msg(use_time):
     #163用户名,用户名还不能乱写。。
     mail_user = 'snoopy98'  
     #密码(部分邮箱为授权码) 
-    mail_pass = 'xxx'   
+    mail_pass = 'xxxx'   
     #邮件发送方邮箱地址
     sender = 'snoopy98@163.com'  
     #邮件接受方邮箱地址，注意需要[]包裹，这意味着你可以写多个邮件地址群发
