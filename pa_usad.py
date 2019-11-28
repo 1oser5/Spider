@@ -14,6 +14,9 @@ import requests
 from bs4 import BeautifulSoup
 import time
 import os
+import smtplib
+from email.mime.text import MIMEText
+import datetime
 def config():
     """爬虫配置"""
     #设置头部
@@ -112,10 +115,63 @@ def get_url(url, headers, dir_url, index = 1):
             color_print('开始下载图片...',fruit.ImgUrl)
             #下载图片
             fruit.download_img(dir_url)
-if __name__ == '__main__':
+def send_msg(dir_url,use_time):
+    """发送爬取结束信息
+
+    :param str dir_url : 文件夹路径
+    """
+    #设置服务器所需信息
+    #163邮箱服务器地址
+    mail_host = 'smtp.163.com'  
+    #163用户名,用户名还不能乱写。。
+    mail_user = 'snoopy98'  
+    #密码(部分邮箱为授权码) 
+    mail_pass = '***REMOVED***'   
+    #邮件发送方邮箱地址
+    sender = 'snoopy98@163.com'  
+    #邮件接受方邮箱地址，注意需要[]包裹，这意味着你可以写多个邮件地址群发
+    receivers = ['lzj7892@dingtalk.com']  
+    #设置email信息
+    content = '''
+    爬取农业完成
+    共获得高清图片 {} 张
+    共耗时 {} 
+    '''.format(len(dir_url),use_time)
+    #邮件内容设置
+    message = MIMEText(content,'plain','utf-8')
+    #邮件主题       
+    message['Subject'] = '爬虫' 
+    #发送方信息
+    message['From'] = sender 
+    #接受方信息     
+    message['To'] = ';'.join(receivers)
+
+    #登录并发送邮件
+    try:
+        smtpObj = smtplib.SMTP() 
+        #连接到服务器
+        smtpObj.connect(mail_host,25)
+        #登录到服务器
+        smtpObj.login(mail_user,mail_pass) 
+        #发送
+        smtpObj.sendmail(
+            sender,receivers,message.as_string()) 
+        #退出
+        smtpObj.quit() 
+        print('success send eamil to %s'%receivers)
+    except smtplib.SMTPException as e:
+        print('error',e) #打印错误
+def main():
     url,headers = config()
     dir_url = input('请输入文件存储文件夹\n')
     get_url(url, headers, dir_url, 380)
+if __name__ == '__main__':
+    #TODO 把函数时间计算和发送邮件封装成装饰器
+    starttime = datetime.datetime.now()
+    main()
+    endtime = datetime.datetime.now()
+    # send_msg()
+
 
 
 
