@@ -125,7 +125,7 @@ def get_url(url, headers, dir_url, index = 1):
             fruit = Fruit(info)
             color_print('开始下载图片...',fruit.ImgUrl)
             #下载图片
-            # fruit.download_img(dir_url)
+            fruit.download_img(dir_url)
             #导出信息
             fruit.export_info(info)
 def send_msg(use_time):
@@ -181,7 +181,7 @@ def count_time(cls):
         starttime = datetime.datetime.now()
         cls(*args, **kwargs)
         endtime = datetime.datetime.now()
-        int_seconds = int((starttime - endtime).total_seconds())
+        int_seconds = int((endtime - starttime).total_seconds())
         return format_seconds(int_seconds)
     return wrapper
 def format_seconds(seconds):
