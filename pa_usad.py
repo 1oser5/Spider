@@ -51,6 +51,10 @@ class Fruit(object):
         with open('{0}/{1}-{2}.png'.format(dir_url,self.Scientific.replace(' ','-'), self.Specimen), 'wb') as f:
             f.write(resp.content)
             color_print('saved...{0}-{1}.png'.format(self.Scientific.replace(' ','-'), self.Specimen))
+    def export_info(self,info):
+        """导出水果信息"""
+        with open('fruit.txt', 'a+') as f:
+            f.write(str(info+'\n'))
 def check_dir(dir_url):
     """检查文件夹是否存在，如果不存在则创建
 
@@ -82,29 +86,36 @@ def get_url(url, headers, dir_url, index = 1):
         defList = s.find_all('dl',class_='defList')
         for p in defList:
             c1 = p.find('dd', class_='blacklight-name_facet')
-            c2 = p.find('dd',class_='blacklight-specimen_identifier_s')
+            c2 = p.find_all('dd',class_='blacklight-specimen_identifier_s')
             c3 = p.find_all('dd',class_='blacklight-year_facet')
+            #区分 c3 长度为 5 3 6
+            C3_MORE_3 = len(c3) > 3
+            #区分 c2 长度为 1 2
+            C2_MORE_1 = len(c2) > 1
             #作者
-            Artist = c1.text
-            #物种编号
-            Specimen = c2.text
+            Artist = c1.text if c1 else ''
             #时间
-            Year = c3[0].text
+            Year = c3[0].text if C3_MORE_3 else ''
             #科学名
-            Scientific = c3[1].text
+            Scientific = c3[1].text if C3_MORE_3 else c3[0].text
             #俗名
-            Common = c3[2].text
+            Common = c3[2].text if C3_MORE_3 else c3[1].text
             #地区
-            Country = c3[3].text if len(c3) == 4 else ''
+            Country = c3[3].text if C3_MORE_3 else ''
+            #品种
+            Variety = c2[0].text if C2_MORE_1 else ''
+            #物种编号
+            Specimen = c2[1].text if C2_MORE_1 else c2[0].text
             #图片编码
             Code = p.find('img')['src'].split('/')[2]
             info = {
                 'Artist':Artist,
                 'Year':Year,
-                'Specimen':Specimen,
                 'Scientific':Scientific,
                 'Common':Common,
                 'Country':Country,
+                'Variety':Variety,
+                'Specimen':Specimen,
                 'Code':Code
                 }
             #处理换行符
@@ -114,8 +125,10 @@ def get_url(url, headers, dir_url, index = 1):
             fruit = Fruit(info)
             color_print('开始下载图片...',fruit.ImgUrl)
             #下载图片
-            fruit.download_img(dir_url)
-def send_msg(dir_url,use_time):
+            # fruit.download_img(dir_url)
+            #导出信息
+            fruit.export_info(info)
+def send_msg(use_time):
     """发送爬取结束信息
 
     :param str dir_url : 文件夹路径
@@ -126,17 +139,16 @@ def send_msg(dir_url,use_time):
     #163用户名,用户名还不能乱写。。
     mail_user = 'snoopy98'  
     #密码(部分邮箱为授权码) 
-    mail_pass = '***REMOVED***'   
+    mail_pass = 'xxx'   
     #邮件发送方邮箱地址
     sender = 'snoopy98@163.com'  
     #邮件接受方邮箱地址，注意需要[]包裹，这意味着你可以写多个邮件地址群发
     receivers = ['lzj7892@dingtalk.com']  
     #设置email信息
     content = '''
-    爬取农业完成
-    共获得高清图片 {} 张
+    爬取美国农业部高清图片完成
     共耗时 {} 
-    '''.format(len(dir_url),use_time)
+    '''.format(use_time)
     #邮件内容设置
     message = MIMEText(content,'plain','utf-8')
     #邮件主题       
@@ -145,7 +157,6 @@ def send_msg(dir_url,use_time):
     message['From'] = sender 
     #接受方信息     
     message['To'] = ';'.join(receivers)
-
     #登录并发送邮件
     try:
         smtpObj = smtplib.SMTP() 
@@ -161,16 +172,35 @@ def send_msg(dir_url,use_time):
         print('success send eamil to %s'%receivers)
     except smtplib.SMTPException as e:
         print('error',e) #打印错误
+def count_time(cls):
+    """计算函数执行时间装饰器，
+
+    param: function cls: 目标函数
+    """
+    def wrapper(*args, **kwargs):
+        starttime = datetime.datetime.now()
+        cls(*args, **kwargs)
+        endtime = datetime.datetime.now()
+        int_seconds = int((starttime - endtime).total_seconds())
+        return format_seconds(int_seconds)
+    return wrapper
+def format_seconds(seconds):
+    """格式化秒，返回 HH:MM:SS 格式时间
+    
+    param: int seconds: 秒
+    """
+    m, s = divmod(seconds, 60)
+    h, m = divmod(m, 60)
+    return("%d:%02d:%02d" % (h, m, s))
+@count_time
 def main():
     url,headers = config()
     dir_url = input('请输入文件存储文件夹\n')
     get_url(url, headers, dir_url, 380)
 if __name__ == '__main__':
-    #TODO 把函数时间计算和发送邮件封装成装饰器
-    starttime = datetime.datetime.now()
-    main()
-    endtime = datetime.datetime.now()
-    # send_msg()
+    #pylint 问题，可以正常运行
+    use_time = main()
+    send_msg(use_time)
 
 
 
