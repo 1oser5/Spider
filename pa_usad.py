@@ -115,8 +115,7 @@ def get_url(url, headers, dir_url, index = 1):
 if __name__ == '__main__':
     url,headers = config()
     dir_url = input('请输入文件存储文件夹\n')
-    get_url(url, headers, dir_url)
-    # get_url(url, headers, dir_url, 380)
+    get_url(url, headers, dir_url, 380)
 
 
 
