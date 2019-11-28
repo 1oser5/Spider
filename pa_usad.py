@@ -13,51 +13,108 @@
 import requests
 from bs4 import BeautifulSoup
 import time
-#设置头部
-user_agent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.97 Safari/537.36'
-headers = {'user-agent':user_agent}
-#数据循环爬取
-#一共380页，但是最后一样质量很低，数量也不对，暂不取
-# for a in range(380):
-# r = requests.get('https://usdawatercolors.nal.usda.gov/pom/search.xhtml?start={0}'.format(20 * a))
-r = requests.get('https://usdawatercolors.nal.usda.gov/pom/search.xhtml?start=0', headers=headers)
-#休眠一秒
-time.sleep(2)
-s = BeautifulSoup(r.text)
-#文本信息
-defList = s.find_all('dl',class_ = 'defList')
-#图片
-imgs = s.find_all('div',class_ = 'thumb-frame')
-Artist = []
-Year = []
-Scientific = []
-Common = []
-Country = []
-Specimen = []
-high_img = []
-for p in defList:
-    #作者
-    c1 = p.find('dd', class_='blacklight-name_facet')
-    Artist.append(c1.text.replace("\n", ""))
-    #物种编号
-    c2 = p.find('dd',class_='blacklight-specimen_identifier_s')
-    Specimen.append(c2.text.replace("\n", ""))
-    #科学名，俗名，地区
-    c3 = p.find_all('dd',class_='blacklight-year_facet')
-    Year.append(c3[0].text.replace("\n", ""))
-    Scientific.append(c3[1].text.replace("\n", ""))
-    Common.append(c3[2].text.replace("\n", ""))
-    Country.append(c3[3].text.replace("\n", "") if len(c3) == 4 else '')
-for x in imgs:
-    #高清图地址
-    high_img.append('https://usdawatercolors.nal.usda.gov/pom/download.xhtml?id={0}'.format(x.find('img')['src'].split('/')[2]))
-print(high_img)
-def download_img(ori_img_url,filename):
-    resp = requests.get(ori_img_url,headers=headers)
-    print('write in ')
-    # with open('/Users/xtl/Desktop/test/' + filename, 'w+') as f:
-    #     f.write(resp.content)
-    #     print('saved...', filename)
-# for i in range(20):
-download_img(high_img[0], Scientific[0])
+import os
+def config():
+    """爬虫配置"""
+    #设置头部
+    user_agent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.97 Safari/537.36'
+    headers = {'user-agent':user_agent}
+    url = 'https://usdawatercolors.nal.usda.gov/pom/search.xhtml?start={}'
+    return (url,headers)
+class Fruit(object):
+    """水果类"""
+    def __init__(self,args):
+        self.Artist = args['Artist']
+        self.Year = args['Year']
+        self.Scientific = args['Scientific']
+        self.Common = args['Common']
+        self.Country = args['Country']
+        self.Specimen = args['Specimen']
+        self.Code = args['Code']
+        self.ImgUrl = self.get_high_img()
+    def get_high_img(self):
+        """拼接高清图片"""
+        return 'https://usdawatercolors.nal.usda.gov/pom/download.xhtml?id={0}'.format(self.Code)
+    def download_img(self,dir_url):
+        """下载高清图片
+        
+        :param str dir_url: 图片存储文件夹
+        """
+        #检查文件夹
+        check_dir(dir_url)
+        resp = requests.get(self.ImgUrl)
+        # 图片一定要以 wb (二进制)打开,文件储存为 Scientific.png 格式
+        with open('{0}/{1}.png'.format(dir_url, self.Scientific.replace(' ','-')), 'wb') as f:
+            f.write(resp.content)
+            color_print('saved...',self.Scientific.replace(' ','-'))
+def check_dir(dir_url):
+    """检查文件夹是否存在，如果不存在则创建
+
+    :param str dir_url: 文件夹路径
+    """
+    if not os.path.exists(dir_url):
+        os.makedirs(dir_url)
+        color_print('build {0} successfully'.format(dir_url))
+def color_print(*args):
+    """彩色打印😂
+
+    :param str s: 打印内容
+    """
+    print('\033[1;35m{} \033[0m'.format(args))
+def get_url(url, headers, dir_url, index = 1):
+    """request 请求
+    
+    :param str url: 请求地址
+    :param dict headers: 请求头
+    :param str dir_url: 存放文件路径,如果不存在默认创建
+    :param int index: 循环次数
+    """
+    for i in range(index):
+        r = requests.get(url.format(20 * i), headers = headers)
+        #休眠一秒
+        time.sleep(1)
+        s = BeautifulSoup(r.text)
+        #文本信息
+        defList = s.find_all('dl',class_ = 'defList')
+        for p in defList:
+            c1 = p.find('dd', class_='blacklight-name_facet')
+            c2 = p.find('dd',class_='blacklight-specimen_identifier_s')
+            c3 = p.find_all('dd',class_='blacklight-year_facet')
+            #作者
+            Artist = c1.text
+            #物种编号
+            Specimen = c2.text
+            #时间
+            Year = c3[0].text
+            #科学名
+            Scientific = c3[1].text
+            #俗名
+            Common = c3[2].text
+            #地区
+            Country = c3[3].text if len(c3) == 4 else ''
+            #图片编码
+            Code = p.find('img')['src'].split('/')[2]
+            info = {
+                'Artist':Artist,
+                'Year':Year,
+                'Specimen':Specimen,
+                'Scientific':Scientific,
+                'Common':Common,
+                'Country':Country,
+                'Code':Code
+                }
+            #处理换行符
+            for k in info:
+                info[k] = info[k].replace('\n', '')
+            #新建实例
+            fruit = Fruit(info)
+            color_print('开始下载图片...',fruit.ImgUrl)
+            #下载图片
+            fruit.download_img(dir_url)
+if __name__ == '__main__':
+    url,headers = config()
+    dir_url = input('请输入文件存储文件夹\n')
+    get_url(url, headers, dir_url,380)
+
+
 
