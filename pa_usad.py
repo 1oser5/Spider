@@ -42,9 +42,10 @@ class Fruit(object):
         """
         #检查文件夹
         check_dir(dir_url)
-        resp = requests.get(self.ImgUrl)
+        #timeout 参数为元组时，第一个表示 Connect 时间，第二个为 read 时间
+        resp = requests.get(self.ImgUrl, timeout=(3, 30))
         # 图片一定要以 wb (二进制)打开,文件储存为 Scientific.png 格式
-        with open('{0}/{1}.png'.format(dir_url, self.Scientific.replace(' ','-')), 'wb') as f:
+        with open('{0}/{1}{2}-.png'.format(dir_url,self.Scientific.replace(' ','-'),self.Specimen), 'wb') as f:
             f.write(resp.content)
             color_print('saved...',self.Scientific.replace(' ','-'))
 def check_dir(dir_url):
@@ -70,12 +71,12 @@ def get_url(url, headers, dir_url, index = 1):
     :param int index: 循环次数
     """
     for i in range(index):
-        r = requests.get(url.format(20 * i), headers = headers)
+        r = requests.get(url.format(20 * i), headers=headers)
         #休眠一秒
         time.sleep(1)
         s = BeautifulSoup(r.text)
         #文本信息
-        defList = s.find_all('dl',class_ = 'defList')
+        defList = s.find_all('dl',class_='defList')
         for p in defList:
             c1 = p.find('dd', class_='blacklight-name_facet')
             c2 = p.find('dd',class_='blacklight-specimen_identifier_s')
@@ -114,7 +115,8 @@ def get_url(url, headers, dir_url, index = 1):
 if __name__ == '__main__':
     url,headers = config()
     dir_url = input('请输入文件存储文件夹\n')
-    get_url(url, headers, dir_url,380)
+    get_url(url, headers, dir_url)
+    # get_url(url, headers, dir_url, 380)
 
 
 
