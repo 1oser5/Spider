@@ -96,7 +96,7 @@ def get_url(url, headers, dir_url, index = 1):
             info['Code'] = Code
             info['ImgUrl'] = get_high_img(Code)
             #新建实例
-            fruit = Fruit(ifo)
+            fruit = Fruit(info)
             #下载图片
             fruit.download_img(dir_url)
             #导出信息
