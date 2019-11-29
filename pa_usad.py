@@ -118,7 +118,7 @@ def send_msg(f):
     #163用户名,用户名还不能乱写。。
     mail_user = 'snoopy98'  
     #密码(部分邮箱为授权码) 
-    mail_pass = 'Snoopy985'   
+    mail_pass = 'xxxx'   
     #邮件发送方邮箱地址
     sender = 'snoopy98@163.com'  
     #邮件接受方邮箱地址，注意需要[]包裹，这意味着你可以写多个邮件地址群发
