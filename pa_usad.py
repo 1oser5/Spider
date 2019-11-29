@@ -18,6 +18,7 @@ import smtplib
 from email.mime.text import MIMEText
 import datetime
 import sys
+import traceback
 def config():
     """爬虫配置"""
     #设置头部
@@ -95,7 +96,7 @@ def get_url(url, headers, dir_url, index = 1):
             info['Code'] = Code
             info['ImgUrl'] = get_high_img(Code)
             #新建实例
-            fruit = Fruit(info)
+            fruit = Fruit(ifo)
             #下载图片
             fruit.download_img(dir_url)
             #导出信息
@@ -106,7 +107,7 @@ def get_upper(s):
     param: str s: 字符串
     """
     return ''.join([i[0].upper() + i[1:] for i in s.split(' ')])
-def send_msg(use_time):
+def send_msg(f):
     """发送爬取结束信息
 
     :param int use_time : 使用时间
@@ -117,16 +118,13 @@ def send_msg(use_time):
     #163用户名,用户名还不能乱写。。
     mail_user = 'snoopy98'  
     #密码(部分邮箱为授权码) 
-    mail_pass = 'xxx'   
+    mail_pass = 'Snoopy985'   
     #邮件发送方邮箱地址
     sender = 'snoopy98@163.com'  
     #邮件接受方邮箱地址，注意需要[]包裹，这意味着你可以写多个邮件地址群发
     receivers = ['lzj7892@dingtalk.com']  
     #设置email信息
-    content = '''
-    爬取美国农业部高清图片完成
-    共耗时 {} 
-    '''.format(use_time)
+    content = str(f)
     #邮件内容设置
     message = MIMEText(content,'plain','utf-8')
     #邮件主题       
@@ -174,11 +172,18 @@ def main():
     #不做参数捕捉了
     dir_url = sys.argv[1:][0]
     url,headers = config()
-    get_url(url, headers, dir_url, 380)
+    get_url(url, headers, dir_url, 1)
 if __name__ == '__main__':
-    #pylint 问题，可以正常运行
-    use_time = main()
-    send_msg(use_time)
+    #添加错误捕捉
+    try:
+        use_time = main()
+        send_msg('''
+    爬取美国农业部高清图片完成
+    共耗时 {} 
+    '''.format(use_time))
+    except Exception as e:
+        send_msg(traceback.print_exc())
+    
 
 
 
