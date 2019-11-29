@@ -60,6 +60,7 @@ def check_dir(dir_url):
 def color_print(*args):
     """彩色打印😂
 
+
     :param str s: 打印内容
     """
     print('\033[1;35m{} \033[0m'.format(args))
