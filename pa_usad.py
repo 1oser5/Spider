@@ -88,7 +88,7 @@ def get_url(url, headers, dir_url, index = 1):
             info = {}
             for i in range(length):
                 #[-1:]删除冒号
-                k = dt[i].text[:-1].get_upper()
+                k = get_upper(dt[i].text[:-1])
                 v = dd[i].text.replace('\n', '')
                 info[k] = v
             #添加图片编码和图片url
