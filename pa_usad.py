@@ -39,7 +39,7 @@ class Fruit(object):
         check_dir(dir_url)
         #timeout 参数为元组时，第一个表示 Connect 时间，第二个为 read 时间
         color_print('开始下载图片...', self.info['ImgUrl'])
-        resp = requests.get(self.info['ImgUrl'], timeout=(3, 30))
+        resp = requests.get(self.info['ImgUrl'], timeout=(5, 30))
         # 图片一定要以 wb (二进制)打开,文件储存为 Scientific.png 格式
         with open('{0}/{1}.png'.format(dir_url,self.info['Code']), 'wb') as f:
             f.write(resp.content)
