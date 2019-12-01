@@ -16,6 +16,7 @@ from bs4 import BeautifulSoup
 import smtplib
 from email.mime.text import MIMEText
 import datetime
+import traceback
 def get_weather():
     '''获取天气'''
     user_agent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.97 Safari/537.36'
@@ -23,7 +24,7 @@ def get_weather():
     r  = requests.get('https://tianqi.911cha.com/hangzhou/',headers=headers)
     s = BeautifulSoup(r.text)
     #获取当天时间
-    today = datetime.date.today()
+    today = get_time()
     #获得当天天气总览
     t_weather = s.find('a',href = './{0}.html'.format(today))
     #最低温度
@@ -36,8 +37,15 @@ def get_weather():
     weather= t_weather.find('div','w_week_desc').text
     return (date,max_tem,min_tem,weather)
 
-
-def send_msg(w):
+def get_time():
+    """获得网站格式时间
+    
+    #原网站个位数日期的时候，显示为 2019-12-1，但 today 显示为 2019-12-01，需要移除0
+    rtype: str
+    """
+    today = str(datetime.date.today()).split('-')
+    return '-'.join([i[1:] if i[0] == '0' else i for i in today])
+def send_msg(content):
     #设置服务器所需信息
     #163邮箱服务器地址
     mail_host = 'smtp.163.com'  
@@ -51,12 +59,7 @@ def send_msg(w):
     receivers = ['lzj7892@dingtalk.com']  
 
     #设置email信息
-    content = '''
-    {0}
-    最高温度: {1}
-    最低温度: {2}
-    天气情况: {3}
-    '''.format(w[0],w[1],w[2],w[3])
+    content = content
     #邮件内容设置
     message = MIMEText(content,'plain','utf-8')
     #邮件主题       
@@ -83,5 +86,14 @@ def send_msg(w):
         print('error',e) #打印错误
 
 if __name__ == '__main__':
-    w = get_weather()
-    send_msg(w)
+    try:
+        w = get_weather()
+        content = '''
+    {0}
+    最高温度: {1}
+    最低温度: {2}
+    天气情况: {3}
+    '''.format(w[0],w[1],w[2],w[3])
+        send_msg(content)
+    except Exception as e:
+        send_msg(traceback.format_exc())
